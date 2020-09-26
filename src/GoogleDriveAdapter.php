@@ -559,12 +559,13 @@ class GoogleDriveAdapter extends AbstractAdapter
      *
      * @param string $dirname
      * @param bool $recursive
+     * @param bool $filesFromSharedWithMe
      *
      * @return array
      */
-    public function listContents($dirname = '', $recursive = false)
+    public function listContents($dirname = '', $recursive = false, $filesFromSharedWithMe = true)
     {
-        return $this->getItems($dirname, $recursive);
+        return $this->getItems($dirname, $recursive, $filesFromSharedWithMe);
     }
 
     /**
@@ -905,12 +906,13 @@ class GoogleDriveAdapter extends AbstractAdapter
      * @param string $dirname
      *            itemId path
      * @param bool $recursive
+     * @param bool $filesFromSharedWithMe
      * @param number $maxResults
      * @param string $query
      *
      * @return array Items array
      */
-    protected function getItems($dirname, $recursive = false, $maxResults = 0, $query = '')
+    protected function getItems($dirname, $recursive = false, $filesFromSharedWithMe = true, $maxResults = 0, $query = '')
     {
         list (, $itemId) = $this->splitPath($dirname);
 
@@ -920,11 +922,8 @@ class GoogleDriveAdapter extends AbstractAdapter
             'pageSize' => $maxResults ?: 1000,
             'fields' => $this->fetchfieldsList,
             'spaces' => $this->spaces,
-            'q' => sprintf('trashed = false and "%s" in parents', $itemId)
+            'q' => 'sharedWithMe'
         ];
-        if ($query) {
-            $parameters['q'] .= ' and (' . $query . ')';
-        }
         $parameters = $this->applyDefaultParams($parameters, 'files.list');
         $pageToken = NULL;
         $gFiles = $this->service->files;
